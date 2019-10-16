@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>招投标-选择供应商</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <link rel="stylesheet" href="../../layuiadmin/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../layuiadmin/style/admin.css" media="all">
+</head>
+<body>
+<form class="layui-form" action="" lay-filter="component-form-group">
+    <div class="layui-card">
+        <table class="layui-hide" id="bid-table-onrow" lay-filter="bid-table-onrow"></table>
+    </div>
+    <div class="layui-form-item layui-layout-admin">
+        <div class="layui-input-block">
+            <div class="layui-footer" style="height:45px; padding: 0px;">
+                <a class="layui-btn layui-btn-sm layui-btn-disabled" id="submit" data-type="">选择供应商</a>
+                <button class="layui-btn layui-btn-primary layui-btn-sm" data-type="close">关闭</button>
+            </div>
+        </div>
+    </div>
+</form>
+<script src="../../layuiadmin/layui/layui.js"></script>
+<script>
+    var invcode = "";
+    var invname = "";
+    layui.config({
+        base: '../../layuiadmin/' //静态资源所在路径
+    }).extend({
+        index: 'lib/index' //主入口模块
+    }).use(['index', 'table', 'form', 'layer'], function () {
+        var $ = layui.$
+            , layer = layui.layer
+            , form = layui.form
+            , element = layui.element
+            , table = layui.table
+            , index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+        $.ajax({
+            type: 'get'
+            , url: 'http://localhost:8081/setAudit'
+            , dataType: 'json'
+            , async: true
+            , data: {}
+            , success: function (result) {
+                var a = table.render({
+                    elem: '#bid-table-onrow'
+                    , height: 'full-45'
+                    , limit: 30
+                    , cols: [[
+                        {type: 'checkbox'}
+                        , {field: 'cVenName', title: '供应商', sort: true}
+                        , {field: 'iInvSCost', title: '物料报价（元）', sort: true, width: 150}
+                        , {field: 'iModSCost', title: '模具报价（元）', sort: true, width: 150}
+                    ]],
+                    data: result
+                });
+                element.render();
+            }
+        });
+
+        //监听行单击事件（单击事件为：rowDouble）
+        table.on('row(bid-table-onrow)', function (obj) {
+            $("#submit").attr('data-type', 'setParent');
+            $("#submit").removeClass("layui-btn-disabled");//layui-btn-disabled
+            form.render('checkbox');
+            // invcode = obj.data.cInvCode;
+            invname = obj.data.cVenName;
+            // layer.alert(obj.data.cVenName);//存货code invcode
+        });
+
+        var active = {
+            //在内部关闭iframe
+            close: function () {
+                parent.layer.close(index);
+            }
+            //给父页面传值
+            , setParent: function () {
+                var checkStatus = table.checkStatus('bid-table-onrow')
+                    , data = checkStatus.data;
+                //alert(data);
+                parent.layer.confirm('确认审核这' + data.length + '个报价吗？', function () {
+                    $.ajax({
+                        type: 'post',
+                        url: 'http://localhost:8081/getValue',
+                        data: JSON.stringify({'data':data}),
+                        dataType: 'json',
+                        contentType: 'application/json; charset=utf-8',
+                        success:function (result) {
+                            if (result.code === 200){
+                                alert("审核成功");
+                            }else {
+                                alert("审核失败");
+                            }
+                        }
+                    });
+                    //ajax.data.del(); rebind table  //date=选中行json数据
+                    parent.layer.closeAll();
+                });
+            }
+        }
+        $('.layui-footer .layui-btn').on('click', function () {
+            var othis = $(this)
+                , type = othis.data('type');
+            active[type] && active[type].call(this);
+        });
+    });
+</script>
+</body>
+</html>

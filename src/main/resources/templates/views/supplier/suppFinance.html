@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>供应商-财务对账</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <link rel="stylesheet" href="../../layuiadmin/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../layuiadmin/style/admin.css" media="all">
+</head>
+<body>
+<div class="layui-card-header" style="text-align:center;padding-top:10px; height: 70px;">
+    <div class="layui-input-inline" style="text-align:left;">
+        <span>物料编码：</span>
+        <div class="layui-form">
+            <input type="text" class="layui-input" id="otype" placeholder="请输入物料编码">
+            <!--<select id="otype" name="orgType" class="select" lay-search="" lay-filter="Type_filter"-->
+            <!--aria-invalid="false">-->
+            <!--<option value="">请选择物料编码</option>-->
+            <!--</select>-->
+        </div>
+    </div>
+    <div class="layui-input-inline" style="text-align:left;padding-left: 30px">
+        <span>单据编号：</span>
+        <div class="layui-form">
+            <input type="text" class="layui-input" id="otype2" placeholder="请输入单据编号">
+            <!--<select id="otype2" name="orgType2" class="select2" lay-search="" lay-filter="Type_filter2"-->
+            <!--aria-invalid="false">-->
+            <!--<option value="">请选择单据编号</option>-->
+            <!--</select>-->
+        </div>
+    </div>
+
+    <div class="layui-input-inline" style="text-align:left;padding-left: 30px">
+        <span>供应商：</span>
+        <div class="layui-form">
+            <input type="text" class="layui-input" id="otype3" placeholder="请输入供应商">
+            <!--<select id="otype3" name="orgType3" class="select3" lay-search="" lay-filter="Type_filter3"-->
+            <!--aria-invalid="false">-->
+            <!--<option value="">请选择供应商</option>-->
+            <!--</select>-->
+        </div>
+    </div>
+    <div class="layui-input-inline" style="text-align:left;padding-left: 30px">
+        <span>单据日期：</span>
+        <input type="text" class="layui-input" id="laydate-type-month" placeholder="请选择日期">
+    </div>
+
+    <button class="layui-btn layui-btn-lg" data-type="reload" onclick="Serach()" style="height:70px;margin-left: 30px">
+        搜索
+    </button>
+</div>
+<script type="text/html" id="toolbarDemo">显示近三个月的数据</script>
+<div class="layui-card-body">
+    <table class="layui-hide" id="addNeeds" lay-filter="bid-table-onrow"></table>
+</div>
+
+<script type="text/html" id="iOriCost">{{test1(d.iOriCost)}}</script>
+<script type="text/html" id="iOriTaxCost">{{test1(d.iOriTaxCost)}}</script>
+
+<script type="text/html" id="iOriMoney">{{test(d.iOriMoney)}}</script>
+<script type="text/html" id="iOriTaxPrice">{{test(d.iOriPrice)}}</script>
+
+<script type="text/html" id="iTaxRate">{{Fix(d.iTaxRate)}}</script>
+<script type="text/html" id="iQuantity">{{Fix(d.iQuantity)}}</script>
+<script type="text/html" id="iSumBillQuantity">{{Fix(d.iSumBillQuantity)}}</script>
+
+<script src="../../layuiadmin/layui/layui.js"></script>
+<script>
+    var cCode = "";
+    var cInvCode = "";
+    var cVenName = "";
+    layui.config({
+        base: '../../layuiadmin/' //静态资源所在路径
+    }).extend({
+        index: 'lib/index' //主入口模块
+    }).use(['index', 'table', 'form', 'laydate', 'laypage'], function () {
+        var $ = layui.$
+            , table = layui.table
+            , element = layui.element
+            , form = layui.form
+            , laydate = layui.laydate
+            , laypage = layui.laypage
+            , layer = layui.layer;//分页
+        var indexs = layer.load(2);
+
+        //日期范围
+        laydate.render({
+            elem: '#laydate-type-month'
+            , range: true
+        });
+
+        table.render({
+            elem: '#addNeeds'
+            , toolbar: '#toolbarDemo'
+            , url: "http://localhost:8081/getMoney?username='" + parent.layui.index.getCookie("username") + "'&&Admin='" + parent.layui.index.getCookie("Admin") + "'"
+            , height: 'full-125'
+            , page: true
+            , limits: [30, 50, 100, 1000, 10000]
+            , limit: 30 //每页默认显示的数量
+            , size: 'sm'
+            , cols: [[
+                {type: 'numbers', width: 50}
+                , {field: 'cCode', title: '入库单号', sort: true, width: 120, align: "center"}
+                , {field: 'cPOID', title: '采购订单号', width: 120, align: "center"}
+                , {field: 'dDate', title: '单据日期', sort: true, width: 120, align: "center"}
+                , {field: 'cInvCode', title: '物料编码', sort: true, width: 120, align: "center"}
+                , {field: 'cInvName', title: '物料名称', width: 120, align: "center"}
+                , {field: 'cInvStd', title: '规格', width: 120, align: "center"}
+                , {field: 'iOriCost', title: '无税单价', width: 120, align: "center", templet: '#iOriCost'}
+                , {field: 'iOriMoney', title: '无税金额', width: 120, align: "center", templet: '#iOriMoney'}
+                , {field: 'iTaxRate', title: '税率', width: 80, align: "center", templet: '#iTaxRate'}
+                , {field: 'iOriTaxCost', title: '含税单价', width: 120, align: "center", templet: '#iOriTaxCost'}
+                , {field: 'iOriPrice', title: '含税金额', width: 120, align: "center", templet: '#iOriTaxPrice'}
+                , {field: 'iQuantity', title: '入库数量', width: 120, align: "center", templet: '#iQuantity'}
+                , {
+                    field: 'iSumBillQuantity',
+                    title: '累计开票数量',
+                    width: 120,
+                    align: "center",
+                    templet: '#iSumBillQuantity'
+                }
+                , {field: 'cVenName', title: '供应商', width: 120, align: "center", sort: true}
+                , {field: 'cPersonName', title: '业务员', width: 120, align: "center"}
+            ]]
+            , beforeSend: function () {
+                this.layerIndex = layer.load(1, {shade: [0.5, '#393D49']});
+            }
+            , complete: function () {
+                layer.close(this.layerIndex);
+            }
+            , done: function () {
+                layer.close(indexs);
+            }
+            , parseData: function (res) {
+                var data = res.data;
+                for (index in data) {
+                    var date = data[index].dDate;
+                    var time = new Date(date);
+                    data[index].dDate = time.getFullYear() + "-" + (time.getMonth() + 1) + "-" + time.getDate();
+                }
+            }
+        });
+
+        element.render();
+
+        $('.layui-card-header .layui-btn').on('click', function () {
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+
+    });
+
+    //小数位为2
+    function test(str) {
+        console.log("str：" + str);
+        if (!str) str = "0.00";
+        let ret = Math.round(parseFloat(str) * 10000) / 10000;
+        if (str.split(".").length === 1) {
+            return ret.toString() + ".00";
+        }
+        var decimal = str.split(".")[0];
+        var floats = str.split(".")[1].substring(0, 2);
+        console.log("all：" + decimal + "." + floats);
+        return decimal + "." + floats;
+    }
+
+    //小数位为4
+    function test1(str) {
+        if (!str) str = "0.0000";
+        let ret = Math.round(parseFloat(str) * 10000) / 10000;
+        if (str.split(".").length === 1) {
+            return ret.toString() + ".0000";
+        }
+        var decimal = str.split(".")[0];
+        var floats = str.split(".")[1].substring(0, 4);
+        return decimal + "." + floats;
+    }
+
+    //无小数位
+    function Fix(str) {
+        if (!str) str = '0.00';
+        let ret = Math.round(parseFloat(str) * 10000) / 10000;
+        // console.log("ret："+ret);
+        let decimal = ret.toString().split('.');
+        // console.log("decimal："+decimal);
+        if (decimal.length === 1) {
+            return ret.toString()
+        }
+        return ret;
+    }
+
+    function Serach() {
+        layui.use('form', function () {
+            var $ = layui.$
+                , table = layui.table;
+            var Uname = parent.layui.index.getCookie("username");
+            var Admin = parent.layui.index.getCookie("Admin");
+            //   var Admin = parent.layui.index.getCookie("Admin");
+            // alert(Uname);
+            table.reload('addNeeds', {
+                url: "http://localhost:8081/searchDate"
+                //根据条件查询
+                , where: {
+                    cInvCode: $('#otype').val()
+                    , cVenName: $('#otype3').val()
+                    , cCode: $('#lotype2').val()
+                    , dDate: $('#laydate-type-month').val()
+                    , Uname: Uname
+                    , Admin: Admin
+                }
+            });
+        });
+    }
+</script>
+</body>
+</html>

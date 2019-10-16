@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>采购-询价计划单表</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <link rel="stylesheet" href="../../layuiadmin/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../layuiadmin/style/admin.css" media="all">
+</head>
+<body>
+
+<div class="layui-card-body">
+
+    <div class="layui-card-header" style="text-align:center">
+        单据编号：
+        <div class="layui-input-inline">
+            <div class="layui-form">
+                <select id="otype" name="orgType" class="select" lay-filter="Type_filter" aria-invalid="false" lay-search="">
+                    <option value="">请选择</option>
+                </select>
+            </div>
+        </div>
+        <button class="layui-btn layui-btn-normal" onclick="search()" data-type="reload" id="selectbyCondition">搜索
+        </button>
+        <button class="layui-btn layui-layout-right layui-btn-normal" data-type="getCheckData">添加</button>
+    </div>
+
+    <table class="layui-hide" id="addNeeds" lay-filter="bid-table-onrow"></table>
+</div>
+
+
+<script src="../../layuiadmin/layui/layui.js"></script>
+<script>
+    // var url = "localhost";
+    var cCod1 = "";
+    layui.config({
+        base: '../../layuiadmin/' //静态资源所在路径
+    }).extend({
+        index: 'lib/index' //主入口模块
+    }).use(['index', 'table', 'form', 'element', 'layer'], function () {
+        var $ = layui.$
+            , layer = layui.layer
+            , form = layui.form
+            , element = layui.element
+            , table = layui.table
+            , laypage = layui.laypage
+            , layer = layui.layer;//分页
+        var indexs = layer.load(2);
+
+        table.render({
+            elem: '#addNeeds'
+            , toolbar: '#toolbarDemo'
+            , url: "http://localhost:8081/inquiryQlan?username='" + parent.layui.index.getCookie("username") + "'&Admin='" + parent.layui.index.getCookie("Admin") + "'"
+            , height: 480
+            , cols: [[
+                {type: 'checkbox', fixed: true}
+                , {
+                    field: 'cDate',
+                    sort: true,
+                    title: '发布日',
+                    width: 120,
+                    templet: "<div>{{layui.util.toDateString(d.cDate,'yyyy-MM-dd')}}</div>",
+                    align: "center"
+                }
+                , {field: 'cCode', sort: true, title: '单据编号', width: 120, align: "center"}
+                , {field: 'cInvCode', sort: true, title: '物料编码', width: 120, align: "center"}
+                , {field: 'cInvName', title: '物料名称', align: "center"}
+                , {field: 'cInvstd', title: '规格', width: 140, align: "center"}
+                , {field: 'qty', title: '数量', width: 100, align: "center"}
+                , {field: 'cInvit', title: '单位', width: 100, align: "center"}
+                , {
+                    field: 'ddate',
+                    sort: true,
+                    title: '期望到货日',
+                    width: 120,
+                    align: "center",
+                    templet: "<div>{{layui.util.toDateString(d.ddate,'yyyy-MM-dd')}}</div>"
+                }
+                , {field: 'cPsn_Name', sort: true, title: '业务员', width: 100, align: "center"}
+            ]]
+            // , cDate: 'tableReload'
+            , done: function () {
+                layer.close(indexs);
+            }
+        });
+        element.render();
+
+        //监听表格复选框选择table.on('checkbox(addNeeds)', function (obj) {
+        table.on('checkbox(bid-table-onrow)', function (obj) {
+            console.log(obj)
+        });
+
+        //监听工具条table.on('tool(bid-table-onrow)', function (obj) {
+        table.on('tool(bid-table-onrow)', function (obj) {
+            var data = obj.data;
+            if (obj.event === 'detail') {
+                layer.msg('ID：' + data.id + ' 的查看操作');
+            } else if (obj.event === 'del') {
+                layer.confirm('真的删除行么', function (index) {
+                    obj.del();
+                    layer.close(index);
+                });
+            } else if (obj.event === 'edit') {
+                layer.alert('编辑行：<br>' + JSON.stringify(data))
+            }
+        });
+
+        //监听排序事件
+        table.on('sort(bid-table-onrow)', function (obj) { //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+            //layer.msg(obj.field);
+            console.log(obj.field); //当前排序的字段名
+            console.log(obj.type); //当前排序类型：desc（降序）、asc（升序）、null（空对象，默认排序）
+            console.log(this); //当前排序的 th 对象
+        });
+
+        $.ajax({
+            url: "http://localhost:8081/search?username='" + parent.layui.index.getCookie("username") + "'&Admin='" + parent.layui.index.getCookie("Admin") + "'"
+            , dataType: 'json'
+            , type: 'post'
+            , async: false
+            , success: function (result) {
+                $.each(result.data, function (index, item) {
+                    // $('#otype').append(new Option(item.cCode));// 下拉菜单里添加元素
+                    $(".select").append("<option value='" + item["cCode"] + "'>" + item["cCode"] + "</option>");
+                    if ($(".select option:contains('" + item["cCode"] + "')").length > 1) {
+                        $(".select option:contains('" + item["cCode"] + "'):gt(0)").remove();
+                    }
+                });
+                form.render("select");
+            }
+        });
+
+        //监听select值的变化
+        form.on('select(Type_filter)', function (data) {
+            cCod1 = data.value;
+            console.log("cc:" + cCod1);
+            // console.log('select.Type_filter: ', this, data);
+
+        });
+
+        var active = {
+            getCheckData: function () { //获取选中数据
+                console.log("...:" + parent.layui.index.getCookie("username"));
+                //alert("111");
+                var checkStatus = table.checkStatus('addNeeds')
+                    , data = checkStatus.data;
+                console.log(data);
+                //layer.msg(JSON.stringify(data));
+
+                $.ajax({
+                    type: 'post'
+                    ,
+                    url: "http://localhost:8081/addInquirySchedule?username='" + parent.layui.index.getCookie("username") + "'&&Admin='" + parent.layui.index.getCookie("Admin") + "'"
+                    ,
+                    data: JSON.stringify({'data': data})
+                    ,
+                    dataType: 'json'
+                    ,
+                    contentType: 'application/json; charset=utf-8'
+                    ,
+                    timeout: 2000
+                    ,
+                    beforeSend: function () {
+                        if (data == '') {
+                            layer.msg('请至少选择一条数据！');
+                            return false;
+                        } else {
+                            this.layerIndex = layer.load(1, {shade: [0.5, '#393D49']});
+                        }
+                    }
+                    ,
+                    success: function (data) {
+                        if (data.code === 200) {
+                            top.layer.msg('添加成功');
+                            parent.layui.index.openTabsPage('bid/list.html', '采购列表');//切换过去
+                            parent.layui.index.refreshAndCloseTabs("list.html", "set.html");
+                            //parent.layui.admin.events.closeThisTabs();
+                        } else {
+                            layer.msg('添加失败');
+                        }
+                    }
+                    ,
+                    complete: function () {
+                        layer.close(this.layerIndex);
+                    }
+                })
+                // layer.alert(JSON.stringify(data));
+            }
+        };
+
+        $('.layui-card-header .layui-btn').on('click', function () {
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+
+    });
+
+    function search() {
+        layui.use('form', function () {
+            var $ = layui.$
+                , table = layui.table;
+            table.reload('addNeeds', {
+                url: 'http://localhost:8081/conditionsSearch'
+                //根据条件查询
+                , where: {
+                    cCode: cCod1
+                }
+            });
+        })
+    }
+
+</script>
+</body>
+</html>

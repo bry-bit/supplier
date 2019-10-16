@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>供应商-合同执行</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <link rel="stylesheet" href="../../layuiadmin/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../layuiadmin/style/admin.css" media="all">
+</head>
+<body>
+<div class="layui-card-header" style="text-align:center;padding-top:10px; height: 70px;">
+    <div class="layui-input-inline" style="text-align:left;">
+        <span>物料编码：</span>
+        <div class="layui-form">
+            <input type="text" class="layui-input" id="otype" placeholder="请输入物料编码">
+            <!--<select id="otype" name="orgType" class="select" lay-filter="Type_filter" lay-search=""-->
+                    <!--aria-invalid="false">-->
+                <!--<option value="">请选择物料编码</option>-->
+            <!--</select>-->
+        </div>
+    </div>
+    <div class="layui-input-inline" style="text-align:left;padding-left: 30px">
+        <span>采购订单号：</span>
+        <div class="layui-form">
+            <input type="text" class="layui-input" id="otype2" placeholder="请输入采购订单号">
+            <!--<select id="otype2" name="orgType2" class="select2" lay-filter="Type_filter2" lay-search=""-->
+                    <!--aria-invalid="false">-->
+                <!--<option value="">请选择采购订单号</option>-->
+            <!--</select>-->
+        </div>
+    </div>
+    <div class="layui-input-inline" style="text-align:left;padding-left: 30px">
+        <span>供应商名称：</span>
+        <div class="layui-form">
+            <input type="text" class="layui-input" id="otype3" placeholder="请输入供应商名称">
+            <!--<select id="otype3" name="orgType3" class="select3" lay-filter="Type_filter3" lay-search=""-->
+                    <!--aria-invalid="false">-->
+                <!--<option value="">请选择供应商名称</option>-->
+            <!--</select>-->
+        </div>
+    </div>
+    <div class="layui-input-inline" style="text-align:left;padding-left: 30px">
+        <span>单据日期：</span>
+        <input type="text" class="layui-input" id="laydate-type-month" placeholder="请选择日期">
+    </div>
+    <button class="layui-btn layui-btn-lg" data-type="reload" onclick="SearchTime()"
+            style="height:70px;margin-left: 30px">搜索
+    </button>
+</div>
+
+<script type="text/html" id="toolbarDemo">
+    <a href="javascript:YuJing()" class="layui-btn layui-btn-warm layui-btn-sm" style="margin-top:3px;float:left;">5-10日预警</a>
+    <a href="javascript:YuJing1()" class="layui-btn layui-btn-danger layui-btn-sm" style="margin-top:3px;float:left;">5日内临期</a>
+    <a href="javascript:YuJing2()" class="layui-btn layui-btn-sm" style="margin-top:3px;float:left;background-color: #cc0000;">超期</a>
+</script>
+
+<div class="layui-card-body">
+    <table class="layui-hide" id="test" lay-filter="test"></table>
+</div>
+
+<script type="text/html" id="iUnitPrice">{{test1(d.iUnitPrice)}}</script>
+<script type="text/html" id="iTaxPrice">{{test1(d.iTaxPrice)}}</script>
+
+<script type="text/html" id="iMoney">{{test(d.iMoney)}}</script>
+<script type="text/html" id="iSum">{{test(d.iSum)}}</script>
+
+<script type="text/html" id="iPerTaxRate">{{Fix(d.iPerTaxRate)}}</script>
+<script type="text/html" id="iQuantity">{{Fix(d.iQuantity)}}</script>
+<script type="text/html" id="noArrQuantity">{{Fix(d.noArrQuantity)}}</script>
+
+<script src="../../layuiadmin/layui/layui.js"></script>
+<script>
+    var cInvCode = "";
+    var cPOID = "";
+    var cVenName = "";
+    layui.config({
+        base: '../../layuiadmin/' //静态资源所在路径
+    }).extend({
+        index: 'lib/index' //主入口模块
+    }).use(['index', 'table', 'form', 'laydate', 'util'], function () {
+        var $ = layui.$
+            , table = layui.table
+            , element = layui.element
+            , form = layui.form
+            , laydate = layui.laydate
+            , util = layui.util
+            , layer = layui.layer;
+        var indexs = layer.load(2);
+
+        //日期范围
+        laydate.render({
+            elem: '#laydate-type-month'
+            , range: true
+        });
+
+        table.render({
+            elem: '#test'
+            , toolbar: '#toolbarDemo'
+            , url: "http://localhost:8081/getBom?username='" + parent.layui.index.getCookie("username") + "'&&Admin='" + parent.layui.index.getCookie("Admin") + "'"
+            , height: 'full-125'
+            , page: true
+            , limits: [30,50,100,1000,10000]
+            , limit: 30 //每页默认显示的数量
+            , size:'sm'
+            , cols: [[
+                {type: 'numbers', width: 50}
+                , {field: 'dPODate', title: '单据日期', sort: true, width: 120, align: "center"}
+                , {field: 'cPOID', title: '采购订单号', sort: true, width: 130, align: "center"}
+                , {field: 'cInvCode', title: '物料编码', sort: true, width: 140, align: "center"}
+                , {field: 'cInvName', title: '物料名称', width: 140, align: "center"}
+                , {field: 'cInvStd', title: '规格', width: 140, align: "center"}
+                , {field: 'iUnitPrice', title: '无税单价', width: 120, align: "center", templet: '#iUnitPrice'}
+                , {field: 'iMoney', title: '无税金额', width: 120, align: "center", templet: '#iMoney'}
+                , {field: 'iPerTaxRate', title: '税率', width: 70, align: "center", templet: '#iPerTaxRate'}
+                , {field: 'iTaxPrice', title: '含税单价', width: 100, align: "center", templet: '#iTaxPrice'}
+                , {field: 'iSum', title: '含税金额', width: 100, align: "center", templet: '#iSum'}
+                , {field: 'iInvQTY', title: '累计开票数量', width: 140, align: "center", hide: true}
+                , {field: 'cVenName', title: '供应商', width: 140, align: "center"}
+                , {field: 'dArriveDate', title: '计划到货日期', sort: true, width: 120, align: "center"}
+                , {field: 'iQuantity', title: '数量', width: 70, align: "center", templet: '#iQuantity'}
+                , {field: 'noArrQuantity', title: '未发货数量', width: 100, align: "center", templet: '#noArrQuantity'}
+                , {field: 'cPersonName', title: '业务员', sort: true, width: 100, align: "center"}
+            ]]
+            , beforeSend: function () {
+                this.layerIndex = layer.load(1, {shade: [0.5, '#393D49']});
+            }
+            , complete: function () {
+                layer.close(this.layerIndex);
+            }
+            , done: function (map) {
+                layer.close(indexs);
+                for (var i in map.data) {
+                    var item = map.data[i];
+                    //console.log(item.dArriveDate);
+                    var date = item.dArriveDate;
+                    var num = item.noArrQuantity;
+                    date = date.substring(0, 19);
+                    date = date.replace(/-/g, '/');
+                    var timestamp = new Date(date).getTime();//到期日时间戳
+                    var nowtime = new Date().getTime();//现在时间戳
+                    var daynum = (timestamp - nowtime) / 1000 / 3600 / 24;//转成差额时间戳
+                    if (daynum > 5 && daynum <= 10 && num != 0) {
+                        $('tr[data-index=' + i + ']').prop('style', 'color:#fcc900');
+                    } else if (daynum <= 5 && daynum > 0 && num != 0) {
+                        $('tr[data-index=' + i + ']').prop('style', 'color:#ff4400');
+                    } else if (daynum <= 0 && num != 0) {
+                        $('tr[data-index=' + i + ']').prop('style', 'color:#d20000');
+                    }
+                    form.render();// 重新渲染一下
+                }
+            }
+            , parseData: function (res) {
+                var data = res.data;
+                for (index in data) {
+                    var date = data[index].dPODate;
+                    var time = new Date(date);
+                    data[index].dPODate = time.getFullYear() + "-" + (time.getMonth() + 1) + "-" + time.getDate();
+                    var dates = data[index].dArriveDate;
+                    var times = new Date(dates);
+                    data[index].dArriveDate = times.getFullYear() + "-" + (times.getMonth() + 1) + "-" + times.getDate();
+                }
+            }
+        });
+
+
+        element.render();
+
+        table.on('sort(test)', function (obj) {
+            table.reload('test', {
+                initSort: obj //记录初始排序，如果不设的话，将无法标记表头的排序状态。 layui 2.1.1 新增参数
+                , where: { //请求参数（注意：这里面的参数可任意定义，并非下面固定的格式）
+                    field: obj.field //排序字段
+                    , order: obj.type //排序方式
+                }
+            });
+        });
+
+
+        $('.layui-card-header .layui-btn').on('click', function () {
+            var type = $(this).data('type');
+          //  active[type] ? active[type].call(this) : '';
+        });
+
+    });
+
+    function SearchTime() {
+        layui.use('form', function () {
+            var $ = layui.$
+                , table = layui.table;
+            var Uname = parent.layui.index.getCookie("username");
+            table.reload('test', {
+                url: "http://localhost:8081/SearchMaterial?Admin='" + parent.layui.index.getCookie("Admin") + "'"
+                , where: {
+                    dPODate: $('#laydate-type-month').val()
+                    , cPOID: $('#otype2').val()
+                    , cVenName: $('#otype3').val()
+                    , cInvCode: $('#otype').val()
+                    , Uname: Uname
+                }
+            });
+
+        });
+    }
+
+    //无小数位
+    function Fix(str) {
+        if (!str) str = '0.00';
+        let ret = Math.round(parseFloat(str) * 10000) / 10000;
+        // console.log("ret："+ret);
+        let decimal = ret.toString().split('.');
+        // console.log("decimal："+decimal);
+        if (decimal.length === 1) {
+            return ret.toString()
+        }
+        return ret;
+    }
+
+    //小数位为2
+    function test(str) {
+        if (!str) str = "0.00";
+        let ret = Math.round(parseFloat(str) * 10000) / 10000;
+        if (str.split(".").length === 1){
+            return ret.toString()+".00";
+        }
+        var decimal = str.split(".")[0];
+        var floats = str.split(".")[1].substring(0, 2);
+        return decimal + "." + floats;
+    }
+
+    //小数位为4
+    function test1(str) {
+        if (!str) str = "0.0000";
+        let ret = Math.round(parseFloat(str) * 10000) / 10000;
+        if (str.split(".").length === 1){
+            return ret.toString()+".0000";
+        }
+        var decimal = str.split(".")[0];
+        var floats = str.split(".")[1].substring(0, 4);
+        return decimal + "." + floats;
+    }
+
+    function YuJing() {
+        var layer = layui.layer;
+        layer.open({
+            type: 2,
+            title: "5-10日预警整体数据",
+            area: ['1100px', '550px'],
+            skin: 'layui-layer-rim',
+            content: ['YuJingData.html', 'no']
+        });
+    }
+
+    function YuJing1() {
+        var layer = layui.layer;
+        layer.open({
+            type: 2,
+            title: "5日内临期整体数据",
+            area: ['1100px', '550px'],
+            skin: 'layui-layer-rim',
+            content: ['YuJingData1.html', 'no']
+        });
+    }
+
+    function YuJing2() {
+        var layer = layui.layer;
+        layer.open({
+            type: 2,
+            title: "超期整体数据",
+            area: ['1100px', '550px'],
+            skin: 'layui-layer-rim',
+            content: ['YuJingData2.html', 'no']
+        });
+    }
+</script>
+</body>
+</html>

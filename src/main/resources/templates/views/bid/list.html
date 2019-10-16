@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>招投标-招标列表</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <link rel="stylesheet" href="../../layuiadmin/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../layuiadmin/style/admin.css" media="all">
+</head>
+<body>
+
+<div class="layui-card-body">
+    <input style="display: none" value="" id="hidden">
+    <table class="layui-hide" id="bid-table-onrow" lay-filter="bid-table-onrow"></table>
+    <script type="text/html" id="openEDIT">
+        {{# if (d.status == 0){ }}
+        <a lay-event="detail" class="layui-btn layui-btn-xs">编辑</a>
+        {{#  }else if (d.status == 1 ){ }}
+        <a lay-event="detail" class="layui-btn layui-btn-warm layui-btn-xs">保存</a>
+        {{#  } else {d.status == 2}}
+        <a lay-event="submit" class="layui-btn layui-btn-xs layui-btn-danger">发布</a>
+        {{#} }}
+    </script>
+    <script type="text/html" id="downloadstat">
+        <a lay-event="downloadstat" class="layui-btn layui-btn-xs">查看</a>
+    </script>
+</div>
+
+<script type="text/html" id="toolbarDemo">已发布采购需求 (双击查看图片)
+<a class="layui-btn layui-btn-normal layui-btn-sm" style="margin:10px"
+   onclick="top.layui.index.openTabsPage('bid/set.html','新增需求')">询价计划单</a>
+<a class="layui-btn layui-btn-normal layui-btn-sm" data-type="addnews" style="margin:10px"
+   onclick="top.layui.index.openTabsPage('bid/addnew.html','新增需求')">发布新需求</a>
+</script>
+
+<div class="layui-card-header">
+    <span class="layui-layout-right" style="margin-right:20px; margin-top: -10px;">
+        <button class="layui-btn layui-btn-danger layui-btn-sm" data-type="getCheckData">删除</button>
+    </span>
+</div>
+
+<script src="../../layuiadmin/layui/layui.js"></script>
+<script>
+    var reqID = "";
+    layui.config({
+        base: '../../layuiadmin/' //静态资源所在路径
+    }).extend({
+        index: 'lib/index' //主入口模块
+    }).use(['index', 'table'], function () {
+        var admin = layui.admin
+            , table = layui.table
+            , $ = layui.$
+            , element = layui.element
+            , layer = layui.layer;
+        var indexs = layer.load(2);
+
+        console.log(parent.layui.index.getCookie("username"));
+        console.log(parent.layui.index.getCookie("Admin"));
+
+        table.render({
+            elem: '#bid-table-onrow'
+            , url: "http://localhost:8081/purchasingList?username='" + parent.layui.index.getCookie("username") + "'&&Admin='" + parent.layui.index.getCookie("Admin") + "'"
+            , toolbar: '#toolbarDemo'
+            , height: 'full-95'
+            , cols: [[
+                {type: 'checkbox'},
+                {field: 'reqID', title: 'id', hide: true},
+                {field: 'pubDate', title: '发布日', sort: true, width: 110, align: "center"},
+                {field: 'cCode', title: '单据编号', sort: true, width: 110, align: "center"},
+                {field: 'cInvCode', title: '物料编码', sort: true, width: 100, align: "center"},
+                {field: 'cInvName', title: '物料名称', align: "center", width: 100},
+                {field: 'pVenName', title: '供应商', sort: true, width: 120, align: "center"},
+                {field: 'iQuantity', title: '数量', width: 60, align: "center"},
+                {field: 'cComUnitName', title: '单位', width: 60, align: "center"},
+                {field: 'cInvStd', title: '规格', width: 115, align: "center"},
+                {field: 'getDate', title: '期望到货日', sort: true, width: 110, align: "center"},
+                {field: 'memo', title: '备注', width: 90, align: "center"},
+                {field: 'cPsn_Name', title: '业务员', sort: true, width: 100, align: "center"},
+                {field: 'imgURL', title: '操作', toolbar: '#openEDIT', width: 78, sort: true, align: "center"},
+                {field: 'download', title: '记录', toolbar: '#downloadstat', width: 78, align: "center"}
+            ]]
+            , done: function (res) {
+                layer.close(indexs);
+                for (var i in res.data) {
+                    var item = res.data[i];
+                    if (item.status === 2) {
+                        $('tr[data-index=' + i + '] input[type="checkbox"]').prop('disabled', true);
+                        $('tr[data-index=' + i + '] input[type="checkbox"]').prop('checked', false);
+                        $('tr[data-index=' + i + '] input[type="checkbox"]').next().remove();
+                        // form.render();// 重新渲染一下
+                    }
+                }
+            }
+        });
+
+
+        element.render();
+
+        table.on('sort(bid-table-onrow)', function(obj){
+            table.reload('bid-table-onrow', {
+                initSort: obj //记录初始排序，如果不设的话，将无法标记表头的排序状态。 layui 2.1.1 新增参数
+                ,where: { //请求参数（注意：这里面的参数可任意定义，并非下面固定的格式）
+                    field: obj.field //排序字段
+                    ,order: obj.type //排序方式
+                }
+            });
+        });
+
+        //监听行双击事件（单击事件为：row）（双击事件为：rowDouble）
+        table.on('rowDouble(bid-table-onrow)', function (obj) {
+            var data = obj.data;
+            layer.photos({
+                photos: {'data': [{'src': data.imgURL}]}
+            });
+        });
+
+        // 监听工具条
+        table.on('tool(bid-table-onrow)', function (obj) {
+            var data = obj.data;
+            console.log("123123131");
+            console.log(data);
+            var topLayui = parent === self ? layui : top.layui;
+            if (obj.event === 'detail') {
+                topLayui.index.openTabsPage("bid/editbid.html?cInvCode=" + data.cInvCode +
+                    "&cInvName=" + encodeURI(encodeURI(data.cInvName)) + "&iQuantity=" + data.iQuantity + "&getDate=" + data.getDate +
+                    "&imgURL=" + encodeURI(encodeURI(data.imgURL)) + "&outDate=" + data.outDate + "&souURL=" + encodeURI(encodeURI(data.souURL)) +
+                    "&memo=" + encodeURI(encodeURI(data.memo)) + "&pVenName=" + encodeURI(encodeURI(data.pVenName)) + "&cInvStd=" +
+                    encodeURI(encodeURI(data.cInvStd)) + "&cComUnitName=" + data.cComUnitName + "&cCode=" + data.cCode + "&havemuju="
+                    + data.mould + "&ReqID=" + data.reqID, "修改需求");
+            }
+            if (obj.event === 'downloadstat') {
+                var paramJson = null;
+                $.ajax({
+                    url: 'http://localhost:8081/selectDownload?ReqID=' + data.reqID,
+                    type: 'post',
+                    async: false,
+                    data: '',
+                    dataType: 'json',
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (info) {
+                        var list = info.list;
+                        //alert(JSON.stringify(list));
+                        for (var i = 0; i < list.length; i++) {
+                            if (list[i].download == 1 && paramJson == null) {
+                                console.log("执行");
+                                paramJson = list[i].cVenName + "<br>";
+                            } else if (list[i].download == 1) {
+                                paramJson = paramJson + list[i].cVenName + "<br>";
+                            }
+                        }
+                        //	alert("转化后的值 : "+paramJson);
+                        //给属性赋值
+                        document.getElementById("hidden").setAttribute("value", paramJson);
+                    }
+                });
+                var contentText = document.getElementById("hidden").value;
+                // alert("获取的值 : "+contentText);
+                layer.open({
+                    type: 1,
+                    skin: 'layui-layer-demo', //样式类名
+                    closeBtn: 1, //不显示关闭按钮
+                    anim: 2,
+                    title: '已下载附件的供应商列表',
+                    shadeClose: true, //开启遮罩关闭
+                    content: contentText
+                });
+            }
+        });
+
+        //监听表格复选框选择
+        table.on('checkbox(bid-table-onrow)', function (obj) {
+            var checkStatus = table.checkStatus('bid-table-onrow')
+                , data = checkStatus.data;
+            for (var i = 0; i < data.length; i++) {
+                if ($('tr[data-index=' + i + '] input[type="checkbox"]').prop('disabled') == true) {
+                    $('tr[data-index=' + i + '] input[type="checkbox"]').prop('checked', false);
+                    $('tr[data-index=' + i + '] input[type="checkbox"]').prop('disabled', true);
+                    $('tr[data-index=' + i + '] input[type="checkbox"]').next().remove();
+                    $('tr[data-index=' + i + '] input[type="checkbox"]').remove();
+                }
+            }
+            form.render();// 重新渲染一下
+        });
+
+        var active = {
+            getCheckData: function () { //获取选中数据
+                var checkStatus = table.checkStatus('bid-table-onrow')
+                    , data = checkStatus.data;
+                console.log(data);
+                layer.confirm('确认删除这些需求吗？', function (index) {
+                    $.ajax({
+                        url: 'http://localhost:8081/deleteList',
+                        type: 'post',
+                        data: JSON.stringify({
+                            "data": data
+                        }),
+                        dataType: 'json',
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (result) {
+                            if (result.code === 200) {
+                                alert("删除成功");
+                                location.reload();
+                            } else {
+                                alert("删除失败");
+                            }
+                        }
+                    });
+                    //ajax.data.del(); rebind table  //date=选中行json数据
+                    layer.close(index);
+                });
+            }
+        };
+        //添加按钮触发新弹层
+        $('.layui-card-header .layui-btn').on('click', function () {
+            var type = $(this).data('type');
+            active[type] && active[type].call(this);
+        });
+    });
+</script>
+
+</body>
+</html>

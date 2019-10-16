@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>修改供应商密码</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <link rel="stylesheet" href="../../../layuiadmin/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../layuiadmin/style/admin.css" media="all">
+    <script src="http://libs.baidu.com/jquery/2.1.4/jquery.min.js"></script>
+</head>
+<body>
+
+<div class="layui-card-body">
+    <table id="demo" lay-filter="test"></table>
+</div>
+
+<script src="../../../layuiadmin/layui/layui.js"></script>
+<script>
+    layui.config({
+        base: '../../../layuiadmin/' //静态资源所在路径
+    }).extend({
+        index: 'lib/index' //主入口模块
+    }).use(['index', 'table'], function () {
+        var $ = layui.$
+            , table = layui.table
+            , element = layui.element
+            , layer = layui.layer;
+
+        table.render({
+            elem: '#demo'
+            , url: "http://localhost:8081/ShowAllThings"
+            , height: 'full-95'
+            , cols: [[
+                {field: 'cVenName', title: '供应商名称', align: "center"},
+                {field: 'pass', title: '密码', align: "center", edit: 'text'},
+                {field: '', title: '操作', align: "center"}
+            ]]
+            , done: function (res) {
+                var data = res.data;
+                for (index in data) {
+                    console.log("1:"+data[index].pass);
+                    $("[data-field='pass']").children().each(function () {
+                        if ($(this).text() === data[index].pass){
+                            $(this).text("********")
+                        }
+                    })
+                }
+
+            }
+        });
+        element.render();
+    });
+</script>
+</body>
+</html>

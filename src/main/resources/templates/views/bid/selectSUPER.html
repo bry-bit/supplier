@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>新增-选择供应商</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <link rel="stylesheet" href="../../layuiadmin/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../layuiadmin/style/admin.css" media="all">
+</head>
+<body>
+<form class="layui-form" action="" lay-filter="component-form-group">
+    <div class="layui-card">
+        <table class="layui-hide" id="bid-table-onrow" lay-filter="bid-table-onrow"></table>
+    </div>
+    <div class="layui-form-item layui-layout-admin">
+        <div class="layui-input-block">
+            <div class="layui-footer" style="height:45px; padding: 0px;">
+                <input type="text" id="gys" name="input" style="height:25px;float:left; margin:8px;">
+                <button type="button" class="layui-btn layui-btn-sm" data-type="reload"
+                        style="float:left;margin:8px -9px;">搜索
+                </button>
+                <button class="layui-btn layui-btn-sm" id="chose" data-type="getCheckData">选择供应商</button>
+                <button class="layui-btn layui-btn-primary layui-btn-sm" data-type="close">关闭</button>
+            </div>
+        </div>
+    </div>
+</form>
+<script src="../../layuiadmin/layui/layui.js"></script>
+<script>
+    layui.config({
+        base: '../../layuiadmin/' //静态资源所在路径
+    }).extend({
+        index: 'lib/index' //主入口模块
+    }).use(['index', 'table', 'form', 'layer'], function () {
+        var $ = layui.$
+            , layer = layui.layer
+            , form = layui.form
+            , table = layui.table
+            , index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+
+        $.ajax({
+            url: "http://localhost:8081/getSupplier"
+            , dataType: "json"
+            , type: "get"
+            , async: true
+            , data: {}
+            , timeout: 20000
+            , beforeSend: function () {
+                this.layerIndex = layer.load(1, {shade: [0.5, '#393D49']});
+            }
+            , success: function (map) {
+                console.log("...："+map);
+                if (getQueryString("selectedSUPER") != null) {
+                    var pVenName = getQueryString("selectedSUPER").split(',');
+                    for (var i = 0; i < map.length; i++) {
+                        for (var n = 0; n < pVenName.length; n++) {
+                            if (pVenName[n] == map[i].cVenCode) {
+                                map[i].LAY_CED = true;
+                            }
+                        }
+                    }
+                }
+                table.render({
+                    elem: '#bid-table-onrow'
+                    , height: 'full-45'
+                    , limit: 30
+                    , page: true
+                    , cols: [[
+                        {type: 'checkbox'}
+                        , {field: 'cVenCode', title: '供应商编码', sort: true, width: 250}
+                        , {field: 'cVenName', title: '供应商名称', sort: true, width: 280}
+                    ]]
+                    , data: map
+                    , done: function (map) {
+                        console.log("...2："+map);
+                        for (var i in map.data) {
+                            console.log("...3："+map.data);
+                            var item = map.data[i];
+                            if (item.LAY_CED == true) {
+                                $('tr[data-index=' + i + '] input[type="checkbox"]').prop('disabled', true);
+                                $('tr[data-index=' + i + '] input[type="checkbox"]').prop('checked', false);
+                                $('.layui-table-cell.laytable-cell-1-0-0.laytable-cell-checkbox:first').html('');//删掉表头全选
+                                $('tr[data-index=' + i + ']').prop('style', 'color:#DDD');
+                                form.render();// 重新渲染一下
+                            }
+                        }
+                    }
+                });
+            }
+            , complete: function () {
+                layer.close(this.layerIndex);
+            }
+        });
+
+        //监听表格复选框选择
+        table.on('checkbox(bid-table-onrow)', function (obj) {
+            console.log(obj.checked);
+        });
+
+        var active = {
+            getCheckData: function () {
+                var checkStatus = table.checkStatus('bid-table-onrow')
+                    , data = checkStatus.data;
+                console.log(data.length);
+                for (var i = 0; i < data.length; i++) {
+                    var listHTML = '<input lay-filter="checkSPR" type="checkbox" name="checkSPR" title="' + data[i].cVenName
+                        + '" value="' + data[i].cVenCode + '" checked>' + parent.layui.$("#suppsID").html();
+                    console.log(listHTML);
+
+                    parent.layui.$("#suppsID").html(listHTML);
+                    parent.layui.form.render('checkbox');
+                    var arr = new Array();
+                    // console.log("arr:" + arr);
+                    parent.layui.$("input:checkbox[name='checkSPR']:checked").each(function (i) {
+                        arr[i] = $(this).attr('title') + "|" + $(this).val();
+                    });
+                    var arrdata = arr.join(",");
+                    parent.layui.$('#pVenName').val(arrdata);
+                }
+                form.render("checkbox");
+                parent.layer.closeAll();
+            }
+            , reload: function () {
+                table.reload('bid-table-onrow', {
+                    url: 'http://localhost:8081/findSupplier'
+                    , where: {
+                        cVenName: $('#gys').val()
+                    }
+                });
+            }
+            , close: function () {
+                parent.layer.close(index);
+            }
+
+        };
+
+        $('.layui-footer .layui-btn').on('click', function () {
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+
+    });
+
+    function getQueryString(name) {
+        var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)', 'i');
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) {
+            return unescape(r[2]);
+        }
+        return null;
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,115 @@
+!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>设置我的资料</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <link rel="stylesheet" href="../../../layuiadmin/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../layuiadmin/style/admin.css" media="all">
+</head>
+<body>
+
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-header">设置我的资料</div>
+                <div class="layui-card-body" pad15>
+
+                    <div class="layui-form" lay-filter="">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">我的角色</label>
+                            <div class="layui-input-inline">
+                                <!--                                <select name="role" lay-verify="" id="role">-->
+                                <!--                                    <option value="" disabled></option>-->
+                                <!--                                </select>-->
+                                <input type="text" name="role" lay-verify="nickname"
+                                       autocomplete="off" class="layui-input" id="role">
+                            </div>
+                            <div class="layui-form-mid layui-word-aux">当前角色不可更改为其它角色</div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">公司全称</label>
+                            <div class="layui-input-inline">
+                                <input type="text" name="username" readonly class="layui-input" id="username">
+                            </div>
+                            <div class="layui-form-mid layui-word-aux">不可修改</div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">用户名</label>
+                            <div class="layui-input-inline">
+                                <input type="text" name="nickname" lay-verify="nickname"
+                                       autocomplete="off" class="layui-input" id="yongHU">
+                            </div>
+                            <div class="layui-form-mid layui-word-aux">不可修改</div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">手机</label>
+                            <div class="layui-input-inline">
+                                <input type="text" name="cellphone" value="" lay-verify="phone" autocomplete="off"
+                                       class="layui-input" id="phone">
+                            </div>
+                            <div class="layui-form-mid layui-word-aux">登陆账号</div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">邮箱</label>
+                            <div class="layui-input-inline">
+                                <input type="text" name="email" value="" lay-verify="email" autocomplete="off"
+                                       class="layui-input" id="email">
+                            </div>
+                        </div>
+                        <div class="layui-form-item layui-form-text">
+                            <label class="layui-form-label">备注</label>
+                            <div class="layui-input-block">
+                                <textarea name="remarks" placeholder="请输入内容" class="layui-textarea"
+                                          id="remarks"></textarea>
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <div class="layui-input-block">
+                                <button class="layui-btn" lay-submit lay-filter="setmyinfo">确认修改</button>
+                                <button type="reset" class="layui-btn layui-btn-primary">重新填写</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="../../../layuiadmin/layui/layui.js"></script>
+<script>
+    layui.config({
+        base: '../../../layuiadmin/' //静态资源所在路径
+    }).extend({
+        index: 'lib/index' //主入口模块
+    }).use(['index', 'set'], function () {
+        var $ = layui.$;
+        $('#yongHU').val(parent.layui.index.getCookie("username"));
+        $('#phone').val(parent.layui.index.getCookie("phone"));
+        // $('#yongHU').val(parent.layui.index.getCookie("pass"));
+        $('#email').val(parent.layui.index.getCookie("email"));
+        $('#remarks').val(parent.layui.index.getCookie("memo"));
+
+        if (parent.layui.index.getCookie("Admin") === "0") {
+            $('#role').val("超级管理员");
+        } else if (parent.layui.index.getCookie("Admin") === "1") {
+            $('#role').val("普通管理员");
+        } else if (parent.layui.index.getCookie("Admin") === "2") {
+            $('#role').val("采购员");
+        } else {
+            $('#role').val("供应商");
+            $('#username').val(parent.layui.index.getCookie("username"));
+        }
+
+        // $.ajax({})
+    });
+
+</script>
+</body>
+</html>

@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>招投标-新增料品招标</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <link rel="stylesheet" href="../../layuiadmin/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../layuiadmin/style/admin.css" media="all">
+</head>
+<body onload="AddsuppsList();">
+
+<div class="layui-fluid layui-row">
+    <form class="layui-form" action="" lay-filter="component-form-group">
+        <div class="layui-col-xs6">
+            <div class="layui-form-item">
+                <a class="layui-btn layui-btn-fluid layui-btn-primary" lay-filter="cInvName" id="cInvName"
+                   disabled=""><span id="span_Id"></span></a>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">物料编码</label>
+                <div class="layui-input-block" style="padding-left:10px;">
+                    <input type="text" name="cInvCode" id="cInvCode" lay-verify="title" class="layui-input" disabled="">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">单据编号</label>
+                <div class="layui-input-block" style="padding-left:10px;">
+                    <input type="text" name="cCode" id="cCode" lay-verify="title" class="layui-input" disabled="">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">物料规格</label>
+                <div class="layui-input-block" style="padding-left:10px;">
+                    <input type="text" name="cInvStd" id="cInvStd" lay-verify="title" class="layui-input" disabled="">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">单位</label>
+                <div class="layui-input-block" style="padding-left:10px;">
+                    <input type="text" name="cComUnitName" id="cComUnitName" lay-verify="title" class="layui-input"
+                           disabled="">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">需求数量</label>
+                <div class="layui-input-block" style="padding-left:10px;">
+                    <input type="text" name="iQuantity" id="iQuantity" lay-verify="number" autocomplete="off"
+                           class="layui-input">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">需求时间</label>
+                <div class="layui-input-block" style="padding-left:10px;">
+                    <input type="text" name="getDate" id="getDate" lay-verify="date" autocomplete="off"
+                           class="layui-input">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">失效时间</label>
+                <div class="layui-input-block" style="padding-left:10px;">
+                    <input type="text" name="outDate" id="outDate" lay-verify="date" autocomplete="off"
+                           class="layui-input">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">模具</label>
+                <div class="layui-input-block" style="padding-left:10px;">
+                    <input type="checkbox" id="havemuju" name="havemuju" title="包含" value="on">
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-col-xs6" style="padding-left: 20px">
+            <div class="layui-upload">
+                <button type="button" class="layui-btn" id="upload-normal">上传预览小图</button>
+                <button type="button" class="layui-btn" id="upload-file">上传原文件</button>
+                <span id="upload-errText"></span>
+                <div class="layui-upload-list">
+                    <img class="layui-upload-img" id="upload-normal-img" src=""
+                         style="width:100%; display: block;">
+                    <div id="upload-normal-img-file"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">供应商</label>
+            <div class="layui-input-block" id="suppsID" style="padding-left:10px;">
+                <a class="layui-btn layui-btn-primary" lay-filter="cVenName" id="cVenName"
+                   href="javascript:getSUP();">点击选择供应商</a>
+                <!--                <input lay-filter="checkSPR" type="checkbox" name="checkSPR" title="AAAAA" value="a_code" checked="">-->
+            </div>
+        </div>
+
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">需求备注</label>
+            <div class="layui-input-block" style="padding-left:10px;">
+                <textarea placeholder="请输入内容" class="layui-textarea" name="memo"></textarea>
+            </div>
+        </div>
+
+        <div style="margin: 0;text-align: center" class="layui-btn-container">
+            <button class="layui-btn layui-btn-radius layui-btn-primary" style="width: 48%" lay-submit=""
+                    lay-filter="Save">保 存
+            </button>
+            <button class="layui-btn layui-btn-radius " lay-submit="" style="width:48%" lay-filter="Submit">提 交</button>
+        </div>
+
+
+        <div class="layui-card" style="display: none;">
+            <div class="layui-card-header">表单隐藏区域</div>
+            <div class="layui-card-body">
+                <input type="text" name="imgURL" id="imgURL" placeholder="imgURL" autocomplete="off"
+                       class="layui-input">
+                <input type="text" name="souURL" id="souURL" placeholder="souURL" autocomplete="off"
+                       class="layui-input">
+                <input type="text" name="pVenName" id="pVenName" placeholder="pVenName" autocomplete="off"
+                       class="layui-input">
+                <input type="text" name="ReqID" id="ReqID" placeholder="ReqID" autocomplete="off"
+                       class="layui-input">
+
+            </div>
+        </div>
+    </form>
+</div>
+</div>
+
+<script src="../../layuiadmin/layui/layui.js"></script>
+<script language="JavaScript">
+    layui.config({
+        base: '../../layuiadmin/' //静态资源所在路径
+    }).extend({
+        index: 'lib/index' //主入口模块
+    }).use(['index', 'form', 'upload', 'laydate', 'layer'], function (res) {
+        //定义layui模块
+        var $ = layui.$
+            , admin = layui.admin
+            , element = layui.element
+            , layer = layui.layer
+            , upload = layui.upload
+            , form = layui.form
+            , laydate = layui.laydate
+            , layim = layui.layim
+            , index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+
+        //普通图片上传
+        var uploadInst = upload.render({
+            elem: '#upload-normal'
+            , url: 'http://localhost:8081/fileUpload'
+            , before: function (obj) {
+                //预读本地文件示例，不支持ie8
+                obj.preview(function (index, file, result) {
+                    $('#upload-normal-img').attr('src', result); //图片链接（base64）
+                });
+            }
+            , done: function (res) {
+                //如果上传失败
+                if (res.code > 0) {
+                    return layer.msg('上传失败');
+                }
+                //上传成功
+                $("input[id='imgURL']").val(res['src']);
+            }
+            , error: function () {
+                //演示失败状态，并实现重传
+                var demoText = $('#upload-errText');
+                demoText.html("<span style='color: #FF5722;'>上传失败</span> <a class='layui-btn layui-btn-mini reloaduploadInst'>重试</a>");
+                demoText.find('.reloaduploadInst').on('click', function () {
+                    uploadInst.upload();
+                });
+            }
+            , beforeSend: function () {
+                this.layerIndex = layer.load(1, {shade: [0.5, '#393D49']});
+            }
+            , complete: function () {
+                layer.close(this.layerIndex);
+            }
+        });
+        //指定允许上传的文件类型
+        upload.render({
+            elem: '#upload-file'
+            , url: 'http://localhost:8081/fileUpload'
+            , accept: 'file' //普通文件
+            , done: function (res) {
+                $("input[id='souURL']").val(res['url']);
+            //    console.log(res);
+                //显示文件路径
+                $("#upload-normal-img-file").html('<span>文件路径:' + res['src'] + '</span>');
+            }
+            , beforeSend: function () {
+                this.layerIndex = layer.load(1, {shade: [0.5, '#393D49']});
+            }
+            , complete: function () {
+                layer.close(this.layerIndex);
+            }
+        });
+
+        //通用from渲染
+        form.render(null, 'component-form-group');
+
+        //两个日期input渲染
+        laydate.render({
+            elem: '#getDate'
+        });
+
+        laydate.render({
+            elem: '#outDate'
+        });
+
+        /* 监听供应商选择区 */
+        form.on('checkbox(checkSPR)', function (data) {
+            //console.log(data.elem.value); //复选框value值，也可以通过data.elem.value得到
+            //console.log(data.elem.title); //复选框value值，也可以通过data.elem.value得到
+            setpVenName();
+        });
+
+        /* 监听提交 */
+        form.on('submit(component-form-grou)', function (data) {
+            parent.layer.alert(JSON.stringify(data.field), {
+                title: '最终的提交信息'
+            });
+            return false;
+        });
+
+        //表单初始赋值
+        form.val('component-form-group', {
+            "cInvCode": getUrlData().cInvCode // "name": "value"
+            , "cCode": getUrlData().cCode
+            , "memo": decodeURI(decodeURI(getUrlData().memo))
+            , "iQuantity": getUrlData().iQuantity
+            , "getDate": getUrlData().getDate
+            , "imgURL": decodeURI(decodeURI(getUrlData().imgURL, "UTF-8"))
+            , "souURL": decodeURI(decodeURI(getUrlData().souURL, "UTF-8"))
+            , "outDate": getUrlData().outDate
+            , "pVenName": decodeURI(decodeURI(getUrlData().pVenName, "UTF-8"))
+            , "cInvStd": decodeURI(decodeURI(getUrlData().cInvStd))
+            , "cComUnitName": decodeURI(getUrlData().cComUnitName, "UTF-8")
+            , "havemuju": decodeURI(decodeURI(getUrlData().mould, "UTF-8"))
+            , "ReqID": decodeURI(decodeURI(getUrlData().ReqID, "UTF-8"))
+        });
+
+        
+        
+        $('#span_Id').html(decodeURI(decodeURI(getUrlData().cInvName, "UTF-8")));
+        $("#upload-normal-img-file").html('<span>文件路径:' + res['getUrlData().souURL'] + '</span>');
+
+        //console.log($('#ReqID').val());
+        var reqID = $('#ReqID').val();
+        $.ajax({
+            url: 'http://localhost:8081/SelectDatas?ReqID=' + reqID
+            , type: 'post'
+            , dataType: 'json'
+            , async: false
+            , success: function (results) {
+            	var paramJson = JSON.stringify(results);//将对象转化为json字符串
+            	// alert(paramJson);
+            	var mould = results.mould;
+            	// alert("模板 : "+mould);
+            	if(mould == 'off'){
+                $('#havemuju').prop("checked", false);
+                var form = layui.form;
+                form.render('checkbox');
+            	}else if(mould == 'on'){
+            		$('#havemuju').prop("checked", true);
+                    var form = layui.form;
+                    form.render('checkbox');
+            	}
+
+            	// alert(results.souURL);
+                if (results.souURL === "") {
+                    $('#upload-normal-img').attr('src', ""); //图片链接（base64）
+                } else if (results.souURL === "") {
+                    $("#upload-normal-img-file").html('<span>文件路径:' + "" + '</span>');
+                } else if (results.imgURL === "" && results.souURL === ""){
+                    $('#upload-normal-img').attr('src', ""); //图片链接（base64）
+                    $("#upload-normal-img-file").html('<span>文件路径:</span>');
+                }else {
+                    $("#upload-normal-img-file").html('<span>文件路径:' + results.souURL + '</span>');
+                    $('#upload-normal-img').attr('src', results.imgURL);
+                }
+            }
+        });
+
+
+        /** 点击提交 */
+        form.on('submit(Submit)', function (data) {
+        //	console.log("1111");
+        var title;
+            if ($("#havemuju").is(":checked")) {
+                var adom = $('#havemuju');//根据标签的id获取标签a的dom节点，jquery方式
+                title = adom.attr('value');//获取title内容
+            } else {
+                title = "off";
+            }
+            $.ajax({
+                url: 'http://localhost:8081/editSubmit',
+                type: 'post',
+                data: JSON.stringify({
+                    "cInvCode": $('#cInvCode').val(),
+                    "iQuantity": $('#iQuantity').val(),
+                    "getDate": $('#getDate').val(),
+                    "outDate": $('#outDate').val(),
+                    "imgURL": $('#imgURL').val(),
+                    "souURL": $('#souURL').val(),
+                    "pVenName": $('#pVenName').val(),
+                    "memo": $('.layui-textarea').val(),
+                    "cInvStd": $('#cInvStd').val(),
+                    "cComUnitName": $('#cComUnitName').val(),
+                    "cCode": $('#cCode').val(),
+                    "mould": title
+                }),
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                success: function (result) {
+                    // layer.close(this.layerIndex);
+                    if (result.code === 0) {
+                        // window.location.reload();
+                        top.layer.msg('提交成功');
+                        parent.layui.index.openTabsPage('bid/list.html', '采购列表');//切换过去
+                        parent.layui.index.refreshAndCloseTabs("list.html", "editbid.html");
+                        // parent.layui.admin.events.closeThisTabs();
+                        layer.close(this.layerIndex);
+                    } else if (result.code === 1) {
+                        alert("提交失败，" + result.msg);
+                        // location.reload();
+                    } else {
+                        alert("提交失败，" + result.msg);
+                    }
+                }
+                , beforeSend: function () {
+                    this.layerIndex = layer.load(1, {shade: [0.5, '#393D49']});
+                }
+                , complete: function () {
+                    layer.close(this.layerIndex);
+                }
+            });
+            return false;
+        });
+
+        /** 点击保存 */
+        form.on('submit(Save)', function (data) {
+            console.log($('#havemuju').val());
+            if ($("#havemuju").is(":checked")) {
+                console.log("以选中")
+                var adom = $('#havemuju');//根据标签的id获取标签a的dom节点，jquery方式
+                var title = adom.attr('value');//获取title内容
+                console.log("选中了 :"+title);
+            } else {
+            	console.log("22222");
+                var title = "off";
+                console.log("没选中 : "+title);
+            }
+            console.log("最终得知 : "+title)
+            $.ajax({
+                url: 'http://localhost:8081/editSave'
+                , type: 'post'
+                , data: JSON.stringify({
+                    "cInvCode": $('#cInvCode').val(),
+                    "iQuantity": $('#iQuantity').val(),
+                    "getDate": $('#getDate').val(),
+                    "outDate": $('#outDate').val(),
+                    "imgURL": $('#imgURL').val(),
+                    "souURL": $('#souURL').val(),
+                    "pVenName": $('#pVenName').val(),
+                    "memo": $('.layui-textarea').val(),
+                    "cInvStd": $('#cInvStd').val(),
+                    "cComUnitName": $('#cComUnitName').val(),
+                    "cCode": $('#cCode').val(),
+                    "mould": title
+                })
+                , dataType: 'json'
+                , contentType: 'application/json; charset=utf-8'
+                , success: function (res) {
+                    // var index = parent.layer.getFrameIndex(window.name);
+                    if (res.code === 200) {
+                        // window.location.reload();
+                        top.layer.msg('保存成功');
+                        parent.layui.index.openTabsPage('bid/list.html', '采购列表');//切换过去
+                        parent.layui.index.refreshAndCloseTabs("list.html", "editbid.html");
+                        // parent.layui.admin.events.closeThisTabs();
+                        // layer.close(this.layerIndex);
+                    } else {
+                        alert("保存失败");
+                        // location.reload();
+                    }
+                }
+                , beforeSend: function () {
+                    this.layerIndex = layer.load(1, {shade: [0.5, '#393D49']});
+                }
+                , complete: function () {
+                    layer.close(this.layerIndex);
+                }
+            });
+            return false;
+        });
+    });
+
+    //点物料标题弹出供应商选择层
+    function getSUP() {
+        var layer = layui.layer
+            , $ = layui.$;
+        var pVenCode = $('#pVenName').val().split(',');//分割出供应商
+        var pVenCodes = '';
+        if (pVenCode != null) {
+            for (var i = 0; i < pVenCode.length; i++) {
+                var pVenCodes_tmp = pVenCode[i].split('|');//循环取出code
+                pVenCodes += pVenCodes_tmp[1] + ',';//code组合
+            }
+            pVenCodes = pVenCodes.substr(0, pVenCodes.length - 1);//去掉最后一个逗号
+            console.log("....4：" + pVenCodes);
+        }
+        layer.open({
+            type: 2,
+            title: "选择供应商",
+            area: ['600px', '480px'],
+            skin: 'layui-layer-rim',
+            content: ['selectSUPER.html?selectedSUPER=' + pVenCodes + '', 'no']
+        });
+    }
+
+    //body Onload 和 选中料品时调用，列出供应商对照表
+    function AddsuppsList() {
+        var $ = layui.$;
+        if ($('#cInvName').text() != "点击选择招标物料") {
+            var pVenName = getQueryString("pVenName");
+            if (pVenName != null && pVenName != "undefined" && pVenName != undefined && pVenName != "") {
+                pVenName = pVenName.split(",");
+            }
+            var myArray = new Array()
+            for (var i = 0; i < pVenName.length; i++) {
+                if (pVenName[i] != "%7Cundefined") {
+                    myArray[i] = pVenName[i];
+                }
+            }
+            pVenName = myArray;
+            var listHTML = '';
+            if (pVenName != null && pVenName != "undefined" && pVenName != undefined && pVenName != "null") {
+                for (var i = 0; i < pVenName.length; i++) {
+                    var arrpVenName = pVenName[i].split("|");
+                    listHTML += '<input lay-filter="checkSPR" type="checkbox" name="checkSPR" title="' + decodeURI(arrpVenName[0]) + '" value="' + decodeURI(arrpVenName[1]) + '" checked="">\r\n';
+                }
+                listHTML = listHTML + $("#suppsID").html();
+                $("#suppsID").html(listHTML);
+                setpVenName();
+            }
+        }
+    }
+
+    ///选中的供应商填入隐藏的表单#pVenName
+    function setpVenName() {
+        var $ = layui.$;
+        var arr = new Array();
+        $("input:checkbox[name='checkSPR']:checked").each(function (i) {
+            arr[i] = $(this).attr('title') + "|" + $(this).val();
+        });
+        var arrdata = arr.join(",");
+        $('#pVenName').val(arrdata);
+    }
+
+    function getUrlData() {
+        let url = window.location.search;
+        url = url.substring(1);
+        console.log("..:" + url);
+        let dataObj = {};
+        if (url.indexOf('&') > -1) {
+            url = url.split('&');
+            for (let i = 0; i < url.length; i++) {
+                let arr = url[i].split('=');
+                dataObj[arr[0]] = arr[1];
+            }
+        } else {
+            url = url.split('=');
+            dataObj[url[0]] = url[1];
+        }
+        // console.log(dataObj);
+        return dataObj;
+    }
+
+    function getQueryString(name) {
+        var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)', 'i');
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) {
+            return unescape(r[2]);
+        }
+        return null;
+    }
+</script>
+
+</body>
+</html>

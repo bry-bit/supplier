@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>招投标-新增料品招标</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <link rel="stylesheet" href="../../layuiadmin/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../layuiadmin/style/admin.css" media="all">
+</head>
+<body onload="AddsuppsList()">
+<div class="layui-fluid layui-row">
+    <form class="layui-form" action="" lay-filter="component-form-group" enctype="multipart/form-data"
+          method="post">
+        <div class="layui-col-xs6">
+            <div class="layui-form-item">
+                <a class="layui-btn layui-btn-fluid layui-btn-primary" lay-filter="cInvName" id="cInvName"
+                   href="javascript:getINV();">点击选择招标物料</a>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label" >物料编码</label>
+                <div class="layui-input-block" style="padding-left:10px;">
+                    <input type="text" id="cInvCode" lay-verify="title" class="layui-input" disabled="">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">物料规格</label>
+                <div class="layui-input-block" style="padding-left:10px;">
+                    <input type="text" class="layui-input" disabled="" id="cInvStd" lay-verify="title" >
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">单位</label>
+                <div class="layui-input-block" style="padding-left:10px;">
+                    <input type="text" id="cComUnitName" lay-verify="title" class="layui-input" disabled="">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">需求数量</label>
+                <div class="layui-input-block" style="padding-left:10px;">
+                    <input type="text" id="iQuantity" lay-verify="number" placeholder="单位:kg" autocomplete="off"
+                           class="layui-input">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">需求时间</label>
+                <div class="layui-input-block" style="padding-left:10px;">
+                    <input type="text" name="getDate" id="getDate" lay-verify="date" autocomplete="off"
+                           class="layui-input">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">失效时间</label>
+                <div class="layui-input-block" style="padding-left:10px;">
+                    <input type="text" name="outDate" id="outDate" lay-verify="date" autocomplete="off"
+                           class="layui-input">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">模具</label>
+                <div class="layui-input-block" id="" style="padding-left:10px;">
+                    <input type="checkbox" id="havemuju" name="havemuju" title="包含" value="on">
+                    <!-- <input type="checkbox" id="havemuju111" name="havemuju1" title="不包含"> -->
+                </div>
+            </div>
+        </div>
+        <div class="layui-col-xs6" style="padding-left: 20px">
+            <div class="layui-upload">
+                <button type="button" class="layui-btn" id="upload-normal">上传预览小图</button>
+                <button type="button" class="layui-btn" id="upload-file">上传原文件</button>
+                <span id="upload-errText"></span>
+                <div class="layui-upload-list">
+                    <img class="layui-upload-img" id="upload-normal-img" style="width:100%;">
+                    <div id="upload-normal-img-file"></div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">供应商</label>
+            <div class="layui-input-block" id="suppsID" style="padding-left:10px;">
+                <a class="layui-btn layui-btn-primary" lay-filter="cVenName" id="cVenName"
+                   href="javascript:getSUP();">点击选择供应商</a>
+                <!--<input lay-filter="checkSPR" type="checkbox" name="checkSPR" title="AAAAA" value="a_code" checked="">-->
+            </div>
+        </div>
+
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">需求备注</label>
+            <div class="layui-input-block" style="padding-left:10px;">
+                <textarea placeholder="请输入内容" class="layui-textarea"></textarea>
+            </div>
+        </div>
+
+        <button class="layui-btn layui-btn-radius layui-btn-fluid"
+                lay-submit lay-filter="submitMsg">立即提交
+        </button>
+
+        <div class="layui-card" style="display: none;">
+            <div class="layui-card-header">表单隐藏区域</div>
+            <div class="layui-card-body">
+                <input type="text" id="imgURL" placeholder="imgURL" autocomplete="off" class="layui-input">
+                <input type="text" id="souURL" placeholder="souURL" autocomplete="off" class="layui-input">
+                <input type="text" id="pVenName" placeholder="pVenName" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+    </form>
+</div>
+</div>
+<script src="../../layuiadmin/layui/layui.js"></script>
+<script>
+    layui.config({
+        base: '../../layuiadmin/' //静态资源所在路径
+    }).extend({
+        index: 'lib/index' //主入口模块
+    }).use(['index', 'form', 'upload', 'laydate', 'layer', 'jquery', 'table'], function () {
+        //定义layui模块
+        var $ = layui.$
+            , admin = layui.admin
+            , element = layui.element
+            , layer = layui.layer
+            , upload = layui.upload
+            , form = layui.form
+            , laydate = layui.laydate
+            , index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+        //普通图片上传
+        var uploadInst = upload.render({
+            elem: '#upload-normal'
+            , url: 'http://localhost:8081/fileUpload'
+            , type: "get"
+            , before: function (obj) {
+                //预读本地文件示例，不支持ie8
+                this.layerIndex = layer.load(1, {shade: [0.5, '#393D49']});
+                obj.preview(function (index, file, result) {
+                    $('#upload-normal-img').attr('src', result); //图片链接（base64）
+                });
+            }
+            , done: function (res) {
+                //如果上传失败
+                if (res.code > 0) {
+                    return layer.msg('上传失败');
+                }
+                layer.msg('上传成功');
+                //上传成功
+                $("input[id='imgURL']").val(res['src']);
+                layer.close(this.layerIndex);
+
+            }
+            , error: function () {
+                //演示失败状态，并实现重传
+                var demoText = $('#upload-errText');
+                demoText.html("<span style='color: #FF5722;'>上传失败</span> <a class='layui-btn layui-btn-mini reloaduploadInst'>重试</a>");
+                demoText.find('.reloaduploadInst').on('click', function () {
+                    uploadInst.upload();
+                });
+            }
+        });
+        /*         var adom = $('#havemuju');//根据标签的id获取标签a的dom节点，jquery方式
+                var title = adom.attr('title');//获取title内容
+                console.log(title) */
+        //测试
+        $(".layui-icon layui-icon-ok").click(function () {
+            console.log("22222");
+            var adom1 = $('#havemuju');//根据标签的id获取标签a的dom节点，jquery方式
+            var title = adom1.attr('title');//获取title内容
+            console.log(title);
+            if ($("#havemuju").is(":checked")) {
+                console.log("以选中")
+            }
+        });
+        //指定允许上传的文件类型
+        upload.render({
+            elem: '#upload-file'
+            , url: 'http://localhost:8081/fileUpload'
+            , accept: 'file' //普通文件
+            , done: function (res) {
+                $("input[id='souURL']").val(res['url']);
+                console.log(res)
+                //显示文件路径
+                //如果上传失败
+                if (res.code > 0) {
+                    return layer.msg('上传失败');
+                }
+                layer.msg('上传成功');
+                $("#upload-normal-img-file").html('<span>文件路径:' + res['src'] + '</span>');
+                layer.close(this.layerIndex);
+            }
+            , error: function () {
+                var demoText = $('#upload-errText');
+                demoText.html("<span style='color: #FF5722;'>上传失败</span> <a class='layui-btn layui-btn-mini reloaduploadInst'>重试</a>");
+                demoText.find('.reloaduploadInst').on('click', function () {
+                    uploadInst.upload();
+                });
+            }
+            , before: function () {
+                this.layerIndex = layer.load(1, {shade: [0.5, '#393D49']});
+            }
+        });
+
+        //通用from渲染
+        form.render(null, 'component-form-group');
+        //两个日期input渲染
+        laydate.render({
+            elem: '#getDate'
+        });
+        laydate.render({
+            elem: '#outDate'
+        });
+
+        /* 监听供应商选择区 */
+        form.on('checkbox(checkSPR)', function (data) {
+            //console.log(data.elem.value); //复选框value值，也可以通过data.elem.value得到
+            //console.log(data.elem.title); //复选框value值，也可以通过data.elem.value得到
+            setpVenName();
+        });
+
+        /* 监听提交 */
+        form.on('submit(component-form-grou)', function (data) {
+            parent.layer.alert(JSON.stringify(data.field), {
+                title: '最终的提交信息'
+            });
+            return false;
+        });
+        form.on('submit(submitMsg)', function (data) {
+            if ($("#havemuju").is(":checked")) {
+                console.log("以选中")
+                var adom = $('#havemuju');//根据标签的id获取标签a的dom节点，jquery方式
+                var title = adom.attr('value');//获取title内容
+                console.log(title);
+            } else {
+                var title = "off";
+            }
+            $.ajax({
+                url: "http://localhost:8081/submitRelease?username='" + parent.layui.index.getCookie("username") + "'"
+                , type: 'post'
+                , data: JSON.stringify({
+                    "cInvCode": $('#cInvCode').val(),
+                    "iQuantity": $('#iQuantity').val(),
+                    "getDate": $('#getDate').val(),
+                    "outDate": $('#outDate').val(),
+                    "imgURL": $('#imgURL').val(),
+                    "souURL": $('#souURL').val(),
+                    "pVenName": $('#pVenName').val(),
+                    "memo": $('.layui-textarea').val(),
+                    "cInvStd": $('#cInvStd').val(),
+                    "cComUnitName": $('#cComUnitName').val(),
+                    "mould": title
+                })
+                , dataType: 'json'
+                , contentType: 'application/json; charset=utf-8'
+                , success: function (result) {
+                    // layer.close(this.layerIndex);
+                    if (result.code === 200) {
+                        // window.location.reload();
+                        top.layer.msg(result.msg);
+                        parent.layui.index.openTabsPage('bid/list.html', '采购列表');//切换过去
+                        parent.layui.index.refreshAndCloseTabs("list.html", "addnew.html");
+                        parent.layui.admin.events.closeThisTabs();
+                        layer.close(this.layerIndex);
+                    } else {
+                        alert(result.msg);
+
+                    }
+                }
+                , beforeSend: function () {
+                    this.layerIndex = layer.load(1, {shade: [0.5, '#393D49']});
+                }
+                , complete: function () {
+                    layer.close(this.layerIndex);
+                }
+            });
+            return false;
+        });
+
+    });
+
+    //点物料标题弹出物料选择层
+    function getINV() {
+        var layer = layui.layer;
+        layer.open({
+            type: 2,
+            title: "选择需求物料",
+            area: ['600px', '480px'],
+            skin: 'layui-layer-rim',
+            content: ['selectINV.html', 'no']
+        });
+    }
+
+    //点物料标题弹出供应商选择层
+    function getSUP() {
+        var layer = layui.layer;
+        layer.open({
+            type: 2,
+            title: "选择供应商",
+            area: ['600px', '480px'],
+            skin: 'layui-layer-rim',
+            content: ['selectSUPER.html', 'no']
+        });
+    }
+
+    //body Onload 和 选中料品时调用，列出供应商对照表
+    function AddsuppsList() {
+        var $ = layui.$;
+        setpVenName();
+    }
+
+    ///选中的供应商填入隐藏的表单#pVenName
+    function setpVenName() {
+        var $ = layui.$;
+        var arr = new Array();
+        $("input:checkbox[name='checkSPR']:checked").each(function (i) {
+            arr[i] = $(this).attr('title') + "|" + $(this).val();
+        });
+        var arrdata = arr.join(",");
+        $('#pVenName').val(arrdata);
+    }
+
+
+</script>
+</body>
+</html>
